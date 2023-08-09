@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
   /* Parse args */
   ReadEnvironmentVariable();
 
-  while ((c = getopt(argc, argv, "h:P:d:u:p:w:c:r:l:i:f:t:m:o:S:0:1:2:3:4:")) !=
+  while ((c = getopt(argc, argv, "h:P:d:u:p::w:c:r:l:i:f:t:m:o:S:0:1:2:3:4:")) !=
          -1) {
     switch (c) {
     case 'h':
@@ -176,7 +176,11 @@ int main(int argc, char *argv[]) {
       break;
     case 'p':
       printf("option p with value '%s'\n", optarg);
-      strncpy(db_password, optarg, DB_STRING_MAX);
+      if (optarg == NULL) {
+        strncpy(db_password, "", DB_STRING_MAX);
+      } else {
+        strncpy(db_password, optarg, DB_STRING_MAX);
+      }
       break;
     case 'f':
       printf("option f with value '%s'\n", optarg);
@@ -728,14 +732,17 @@ int thread_main(thread_arg *arg) {
   // printf("Using schema: %s\n", db_string_full);
 
   ctx[t_num] = mysql_init(NULL);
-
+  const char* password = NULL;
+  if (strlen(db_password) != 0) {
+      password = db_password;
+  }
   if (is_local == 1) {
     /* exec sql connect :connect_string; */
-    resp = mysql_real_connect(ctx[t_num], "localhost", db_user, db_password,
+    resp = mysql_real_connect(ctx[t_num], "localhost", db_user, password,
                               db_string_full, port, db_socket, 0);
   } else {
     /* exec sql connect :connect_string USING :db_string; */
-    resp = mysql_real_connect(ctx[t_num], connect_string, db_user, db_password,
+    resp = mysql_real_connect(ctx[t_num], connect_string, db_user, password,
                               db_string_full, port, db_socket, 0);
   }
 

@@ -15,7 +15,7 @@ add_library(tpcc_mysql
         )
 
 add_executable(tpcc_load load.c)
-add_executable(tpcc_bench main.c)
+add_executable(tpcc_start main.c)
 
 target_link_libraries(tpcc_load
         tpcc_mysql
@@ -23,7 +23,7 @@ target_link_libraries(tpcc_load
         pthread
         m)
 
-target_link_libraries(tpcc_bench
+target_link_libraries(tpcc_start
         tpcc_mysql
         mysqlclient
         pthread
