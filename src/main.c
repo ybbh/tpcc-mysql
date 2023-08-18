@@ -80,11 +80,11 @@ double cur_max_rt[5];
 
 double prev_total_rt[5];
 
-#define RTIME_NEWORD 5
-#define RTIME_PAYMENT 5
-#define RTIME_ORDSTAT 5
-#define RTIME_DELIVERY 80
-#define RTIME_SLEV 20
+#define RTIME_NEWORD 50
+#define RTIME_PAYMENT 50
+#define RTIME_ORDSTAT 50
+#define RTIME_DELIVERY 800
+#define RTIME_SLEV 200
 
 int rt_limit[5] = {RTIME_NEWORD, RTIME_PAYMENT, RTIME_ORDSTAT, RTIME_DELIVERY,
                    RTIME_SLEV};
@@ -261,6 +261,8 @@ int main(int argc, char *argv[]) {
     printf("\n");
   }
 
+  counting_on = 1;
+
   /*
     if ((num_node == 0)&&(argc == 14)) {
       valuable_flg = 1;
@@ -403,7 +405,7 @@ int main(int argc, char *argv[]) {
   SetSeed(seed);
 
   if (valuable_flg == 0) {
-    seq_init(1, 0, 0, 0, 0); /* normal ratio */
+    seq_init(10,10,1,1,1); /* normal ratio */
   } else {
     seq_init(atoi(argv[9 + arg_offset]), atoi(argv[10 + arg_offset]),
              atoi(argv[11 + arg_offset]), atoi(argv[12 + arg_offset]),
@@ -480,7 +482,6 @@ int main(int argc, char *argv[]) {
   }
 #endif
 
-  counting_on = 1;
   /* wait signal */
   for (i = 0; i < (measure_time / PRINT_INTERVAL); i++) {
 #ifndef _SLEEP_ONLY_
@@ -560,6 +561,9 @@ int main(int argc, char *argv[]) {
   for (i = 0, j = 0; i < 5; i++) {
     j += (success[i] + late[i]);
   }
+
+  f = 100.0 * (float)(success[0] + late[0]) / (float)j;
+  printf("      New-Order: %3.2f%%\n", f);
 
   f = 100.0 * (float)(success[1] + late[1]) / (float)j;
   printf("        Payment: %3.2f%% (>=43.0%%)", f);
