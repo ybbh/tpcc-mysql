@@ -92,15 +92,15 @@ char *argv[];
       strncpy(connect_string, optarg, DB_STRING_MAX);
       break;
     case 'd':
-      printf("option d with value '%s'\n", optarg);
+      printf("option d(db_string) with value '%s'\n", optarg);
       strncpy(db_string, optarg, DB_STRING_MAX);
       break;
     case 'u':
-      printf("option u with value '%s'\n", optarg);
+      printf("option u(db_user) with value '%s'\n", optarg);
       strncpy(db_user, optarg, DB_STRING_MAX);
       break;
     case 'p':
-      printf("option p with value '%s'\n", optarg);
+      printf("option p(db_password) with value '%s'\n", optarg);
       if (optarg == NULL) {
         strncpy(db_password, "", DB_STRING_MAX);
       } else {
@@ -108,24 +108,24 @@ char *argv[];
       }
       break;
     case 'w':
-      printf("option w with value '%s'\n", optarg);
+      printf("option w(warehouse_count) with value '%s'\n", optarg);
       count_ware = atoi(optarg);
       break;
     case 'l':
-      printf("option l with value '%s'\n", optarg);
+      printf("option l(part_no) with value '%s'\n", optarg);
       part_no = atoi(optarg);
       particle_flg = 1;
       break;
     case 'm':
-      printf("option m with value '%s'\n", optarg);
+      printf("option m(minimal_warehouse) with value '%s'\n", optarg);
       min_ware = atoi(optarg);
       break;
     case 'n':
-      printf("option n with value '%s'\n", optarg);
+      printf("option n(max_warehouse) with value '%s'\n", optarg);
       max_ware = atoi(optarg);
       break;
     case 'P':
-      printf("option P with value '%s'\n", optarg);
+      printf("option P(port) with value '%s'\n", optarg);
       port = atoi(optarg);
       break;
     case '?':

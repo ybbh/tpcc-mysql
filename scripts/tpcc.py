@@ -4,6 +4,7 @@ import argparse
 import os
 import re
 import json
+import time
 
 MYSQL_USER='root'
 MYSQL_PASSWORD=''
@@ -80,7 +81,7 @@ def mysql_run_bench_tpcc(address, mysql_user, mysql_password, mysql_db_name,  wa
     # use the last
 
     cmd_run_tpcc = '''\
-export LD_LIBRARY_PATH=/usr/local/mysql/lib/mysql/:/usr/local/lib/
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/mysql/lib/mysql/:/usr/local/lib/
 {}
 {}/bin/tpcc_start -h{} -P{} -d{} -u{} -p{} -w{} -c{} -r10 -l{}
 '''.format(tpcc_environment_variable(),
@@ -139,7 +140,8 @@ def main():
         mysql_init(MYSQL_USER, MYSQL_INSTALL_DIR)
         return
     elif args.run:
-        for terminal in [1, 10, 50, 100, 150, 200]:
+        for terminal in [1, 10, 50, 100, 150]:
+            time.sleep(10);
             mysql_run_bench_tpcc(address, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DB_NAME, warehouse, terminal)
         return
 

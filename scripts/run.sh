@@ -3,7 +3,7 @@ set -u
 set -x
 set -e
 
-export LD_LIBRARY_PATH=/usr/local/mysql/lib/mysql/
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/mysql/lib/mysql/
 
 DR="/mnt/fio320/bench"
 BD="/data/back/fio320/bench"
