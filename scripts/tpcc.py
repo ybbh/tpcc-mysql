@@ -5,6 +5,10 @@ import os
 import re
 import json
 import time
+import multiprocessing
+import re
+import psutil
+import queue
 
 MYSQL_USER='root'
 MYSQL_PASSWORD=''
@@ -120,19 +124,75 @@ def mysql_init(mysql_user, install_dir):
         run_shell_command(shell_command=cmd)
 
 
+def cpu_usage(messqge_queue:multiprocessing.Queue):
+    mysqld_process = None
+    for p in psutil.process_iter():
+        if p.name() == 'mysqld':
+            mysqld_process = p
+            break
+    if mysqld_process is None:
+        return
 
+    pattern = 'pcputimes\(user=(.*), system=(.*), children_user=(.*), children_system=(.*), iowait=(.*)\)'
+    p_cpu_times = re.compile(pattern)
+    user = 0
+    system = 0
+    n = 0
+    iowait = 0
+    start = False
+    while True:
+        first = False
+        try:
+            item = messqge_queue.get(timeout=5)
+            if item == 'cpu_usage':
+                n += 1
+                print("start calculate {}".format(n))
+                start = True
+                first = True
+            elif item == "cpu_usage end":
+                print("end calculate {}".format(n))
+                start = False
+        except queue.Empty:
+            None
+
+        if start:
+            s_cpu_times = str(mysqld_process.cpu_times())
+            #print(s_cpu_times)
+            m = p_cpu_times.match(s_cpu_times)
+            #print(m)
+            user1 = float(m[1])
+            system1 = float(m[2])
+            iowait1 = float(m[5])
+            if not first:
+                print('user={}, system={}, iowait={}'.format(user1 - user, system1 - system, iowait1 - iowait))
+            user = user1
+            system = system1
+            iowait = iowait1
+            print("cpu percent {}%".format(mysqld_process.cpu_percent()))  
+
+
+def test_cpu_usage():
+    queue = multiprocessing.Queue()
+    proc = multiprocessing.Process(target=cpu_usage, args=(queue,))
+    proc.start()
+    while True:
+        queue.put('cpu_usage')
+        time.sleep(10);
 
 def main():
     parser = argparse.ArgumentParser(description='tpcc')
     parser.add_argument('-l', '--load', action='store_true', help='mysql load')
     parser.add_argument('-i', '--init', action='store_true', help='mysql init')
     parser.add_argument('-r', '--run', action='store_true', help='test mysql run')
-
+    parser.add_argument('-t', '--cpu-times', action='store_true', help='CPU times')
     args = parser.parse_args()
 
     terminal = 8
     warehouse = 20
     address = '127.0.0.1'
+
+    #if args.cpu_times:
+    #    test_cpu_usage()
 
     if args.load:
         mysql_load(address, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DB_NAME, warehouse)
@@ -140,9 +200,18 @@ def main():
         mysql_init(MYSQL_USER, MYSQL_INSTALL_DIR)
         return
     elif args.run:
+        if args.cpu_times:
+            print('output cpu usage')
+            queue = multiprocessing.Queue()
+            proc = multiprocessing.Process(target=cpu_usage, args=(queue,))
+            proc.start()
         for terminal in [1, 10, 50, 100, 150]:
             time.sleep(10);
+            if args.cpu_times:
+                queue.put('cpu_usage')
             mysql_run_bench_tpcc(address, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DB_NAME, warehouse, terminal)
+            if args.cpu_times:
+                queue.put('cpu_usage end')
         return
 
 if __name__ == '__main__':
